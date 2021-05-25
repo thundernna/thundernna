@@ -25,6 +25,6 @@ jobs:
       - checkout
       - run:
           name: Run Python tests
-          command:
+          command: |
             cd tests/python/
             pytest
