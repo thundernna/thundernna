@@ -27,7 +27,7 @@ jobs:
           name: Run Python tests
           command: |
             cd tests/python/
-            sudo pip install pipenv
+            sudo pip3 install pipenv
             pipenv install pytest, coverage
             pipenv run python3 ./test_dummy.py
 #            pytest
