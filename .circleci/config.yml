@@ -41,12 +41,12 @@ jobs:
           name: Install Python dependencies
           command: |
             pip install pipenv
-            pipenv install pytest coverage
+            pipenv install pytest coverage pandas
       - save_cache:
           key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
           paths:
             - ".venv"
-            # - "/usr/local/bin"
+            - "/usr/local/bin"
             # - "/usr/local/lib/python3.9/site-packages"
       - run:
           name: Run Python tests
