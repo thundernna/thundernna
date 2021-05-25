@@ -37,7 +37,7 @@ jobs:
       # - run: sudo chown -R circleci:circleci /usr/local/lib/python3.9/site-packages
       - restore_cache:
           keys:
-            - deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
+            # - deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
             - deps9-
       - run:
           name: Install Python dependencies
