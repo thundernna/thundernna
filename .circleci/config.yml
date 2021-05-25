@@ -18,7 +18,7 @@ workflows:
 
 jobs:
   Python:
-    # working_directory: ~/circleci-python
+    working_directory: ~/circleci-python
     docker:
       - image: cimg/python:3.9.1
     steps:
@@ -27,5 +27,7 @@ jobs:
           name: Run Python tests
           command: |
             cd tests/python/
-            python3 ./test_dummy.py
+            sudo pip install pipenv
+            pipenv install pytest, coverage
+            pipenv run python3 ./test_dummy.py
 #            pytest
