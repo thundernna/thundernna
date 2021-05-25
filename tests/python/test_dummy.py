@@ -2,4 +2,11 @@
 import pytest
 import coverage
 
-print("Test: Hello World!")
+
+def main():
+    print("Test: Hello World!")
+
+
+if __name__ == '__main__':
+    print("\nEntering tests...")
+    main()
