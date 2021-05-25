@@ -36,7 +36,7 @@ jobs:
             sudo chown -R circleci:circleci /usr/local/bin
       # - run: sudo chown -R circleci:circleci /usr/local/lib/python3.9/site-packages
       - restore_cache:
-          key: 
+          key:
             - deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
             - deps9-
       - run:
