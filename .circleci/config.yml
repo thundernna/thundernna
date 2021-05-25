@@ -50,4 +50,4 @@ jobs:
           command: |
             cd tests/python/
             pipenv run python3 ./test_dummy.py
-#            pytest
+#            pipenv run pytest
