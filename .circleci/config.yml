@@ -21,6 +21,9 @@ jobs:
     working_directory: ~/circleci-python
     docker:
       - image: cimg/python:3.9.1
+        environment:
+          PIPENV_VENV_IN_PROJECT: true
+          DATABASE_URL: postgresql://root@localhost/circle_test?sslmode=disable
     steps:
       - checkout
       - run:
