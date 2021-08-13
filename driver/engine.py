@@ -1,5 +1,6 @@
 import os
 import ssl
+from time import time
 import numpy as np
 import torch
 import torchvision
@@ -10,12 +11,88 @@ from tvm import relay
 from tvm.contrib.download import download_testdata
 # from tvm.contrib import graph_executor
 import tvm.contrib.graph_runtime as graph_runtime
+import cudaprofile as cp
 
 
 BUILD_PATH = "build/"
+INP_NUM = 1000
+DUP = 2
 
-def main():
-    pass
+
+def main(model_name, model, rt):
+    def warm_up():
+        lth = len(repo)
+        tvm_output_list, torch_output_list = [], []
+        print("Warming up...")
+        for i, img in enumerate(repo):
+            print("Warming up... %4d / %4d" % ((i + 1), lth))
+            tvm_output_list.append(predict_torch(model, img))
+            torch_output_list.append(predict(rt, img))
+        
+        consistFlag = synset_lookup(tvm_output_list, torch_output_list)
+        result = "True" if consistFlag else "False"
+        print("\nResult of consistency check:", result)
+        return consistFlag
+    
+
+    def e2e():
+        start = time()
+        for img in repo:
+            predict_torch(model, img)
+        end = time()
+        tem_torch = end - start
+
+        start = time()
+        for img in repo:
+            predict(rt, img)
+        end = time()
+        tem_tvm = end - start
+
+        return tem_torch, tem_tvm
+
+
+    repo = image_repo(INP_NUM)
+    print("%d input pictures prepared" % len(repo))
+
+    # consistFlag = warm_up()
+
+    print("End to End profiling...")
+    duration_torch, duration_tvm = 0, 0
+    for i in range(DUP):
+        print("Dup #%4d times..." % (i + 1))
+        tem_torch, tem_tvm = e2e()
+        duration_torch += tem_torch
+        duration_tvm += tem_tvm
+
+    print("\nConfig:\n  model = %s\n  INP_NUM = %d\n  DUP = %d" % (model_name, INP_NUM, DUP))
+    print("End2End Profiling Result")
+    print("================================================")
+    print("PyTorch RunTime:  ", duration_torch, "s")
+    print("TVM Graph RunTime:", duration_tvm, "s")
+    print("================================================\n")
+
+    return
+
+
+def init():
+    img = sample_img()
+    # mod, params = encapsulate(model, img)
+    # tvm_output = runtime(mod, params, img, imgName="default" target="llvm")
+
+    # ctx = tvm.cpu()
+    # target = "llvm"
+    ctx = tvm.gpu()
+    target = "cuda -libs=cublas,cudnn"
+    
+    # rt = runtime_v7(ctx=tvm.cpu(), target="llvm", compiled=False)
+    rt = runtime_v7(ctx=ctx, target=target, compiled=False)
+    # rt = runtime_v7(ctx=ctx, target=target, compiled=True)
+    tvm_output = predict(rt, img, imgType="default", ctx=ctx)
+
+    torch_output = predict_torch(model, img)
+    synset_lookup([tvm_output], [torch_output])
+
+    return rt
 
 
 def load_relay_module(graph_def, input_shape): 
@@ -40,8 +117,8 @@ def encapsulate(model, img, imgType="default"):
 
 
 def compile_graph_runtime(mod, params, target="llvm", target_host="llvm"):
-    if target == "gpu":     # Preserved
-        target = tvm.target.Target("gpu")
+    if target != "llvm":
+        target = "cuda -libs=cublas,cudnn"
     else:
         target = tvm.target.Target("llvm")
         dev = tvm.cpu(0)
@@ -96,9 +173,11 @@ def load_graph_runtime():
     return graph, lib, params
 
 
-def runtime_v7(mod, params, ctx=tvm.cpu(), target="llvm", compiled=False):
+def runtime_v7(ctx=tvm.cpu(), target="llvm", compiled=False):
     if not compiled:
-        graph, lib, params = compile_graph_runtime(mod, params)
+        img = sample_img()
+        mod, params = encapsulate(model, img)
+        graph, lib, params = compile_graph_runtime(mod, params, target=target, target_host="llvm")
 
     graph, lib, params = load_graph_runtime()
     rt = graph_runtime.create(graph, lib, ctx)
@@ -114,10 +193,18 @@ def predict(rt, img, imgType="default", ctx=tvm.cpu()):
     rt.run()
     ctx.sync()
     tvm_output = rt.get_output(0)
-    return tvm_output
+    return tvm_output.asnumpy()
 
 
-def synset_lookup(tvm_output):
+def predict_torch(model, img):
+    with torch.no_grad():
+        torch_img = torch.from_numpy(img)
+        torch_output = model(torch_img)
+    
+    return torch_output.numpy()
+
+
+def synset_lookup(tvm_output_list, torch_output_list):
     ssl._create_default_https_context = ssl._create_unverified_context
     synset_url = "".join(
         [
@@ -149,29 +236,26 @@ def synset_lookup(tvm_output):
 
     class_id_to_key = [x.strip() for x in class_id_to_key]
 
-    # Get top-1 result for TVM
-    top1_tvm = np.argmax(tvm_output)
-    tvm_class_key = class_id_to_key[top1_tvm]
-
-    # Convert input to PyTorch variable and get PyTorch result for comparison
-    with torch.no_grad():
-        torch_img = torch.from_numpy(img)
-        output = model(torch_img)
+    consistFlag = True
+    for i in range(min(len(tvm_output_list), len(torch_output_list))):
+        # Get top-1 result for TVM
+        top1_tvm = np.argmax(tvm_output_list[i])
+        tvm_class_key = class_id_to_key[top1_tvm]
 
         # Get top-1 result for PyTorch
-        top1_torch = np.argmax(output.numpy())
+        top1_torch = np.argmax(torch_output_list[i])
         torch_class_key = class_id_to_key[top1_torch]
 
-    print("Relay top-1 id: {}, class name: {}".format(top1_tvm, key_to_classname[tvm_class_key]))
-    print("Torch top-1 id: {}, class name: {}".format(top1_torch, key_to_classname[torch_class_key]))
+        print("\nImage #%4d" % (i + 1))
+        print("Relay Prediction id: {}, class name: {}".format(top1_tvm, key_to_classname[tvm_class_key]))
+        print("Torch Prediction id: {}, class name: {}".format(top1_torch, key_to_classname[torch_class_key]))
+        if tvm_class_key != torch_class_key:
+            consistFlag = False
+    
+    return consistFlag
 
 
-def test_img():
-    ssl._create_default_https_context = ssl._create_unverified_context
-    img_url = "https://github.com/dmlc/mxnet.js/blob/main/data/cat.png?raw=true"
-    img_path = download_testdata(img_url, "cat.png", module="data")
-    img = Image.open(img_path).resize((224, 224))
-
+def preprocess(img):
     my_preprocess = transforms.Compose(
         [
             transforms.Resize(256),
@@ -182,8 +266,28 @@ def test_img():
     )
     img = my_preprocess(img)
     img = np.expand_dims(img, 0)
-    
     return img
+
+
+def sample_img():
+    img_url = "https://github.com/dmlc/mxnet.js/blob/main/data/cat.png?raw=true"
+    img_path = download_testdata(img_url, "cat.png", module="data")
+    img = Image.open(img_path).resize((224, 224))
+    return preprocess(img)
+
+
+def image_repo(num):
+    imagePath = "/workdir/shengze/ResNet/thundernna/images/animals10/raw-img/gatto/"
+    files = os.listdir(imagePath)
+
+    repo = []
+    for i, imgName in enumerate(files[:max(num, 0)], 1):
+        print("Preparing #%4d input picture..." % i)
+        img = Image.open(os.path.join(imagePath, imgName)).resize((224, 224))
+        repo.append(preprocess(img))
+    
+    print("Input images ready. ")
+    return repo
 
 
 
@@ -194,16 +298,12 @@ if __name__ == '__main__':
     os.system("mkdir -p %s" % BUILD_PATH)
     print(BUILD_PATH)
 
-    model_name = "resnet18"
+    # model_name = "resnet18"
+    # model_name = "resnet34"
+    # model_name = "resnet50"
+    model_name = "resnet101"
     model = getattr(torchvision.models, model_name)(pretrained=True)
     model = model.eval()
 
-    img = test_img()
-    mod, params = encapsulate(model, img)
-    # tvm_output = runtime(mod, params, img, imgName="default" target="llvm")
-
-    rt = runtime_v7(mod, params, ctx=tvm.cpu(), target="llvm", compiled=False)
-    tvm_output = predict(rt, img, imgType="default", ctx=tvm.cpu())
-
-    synset_lookup(tvm_output)
-    
+    rt = init()
+    main(model_name, model, rt)
