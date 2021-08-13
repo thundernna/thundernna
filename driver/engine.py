@@ -1,7 +1,7 @@
 import os
+import ssl
 import numpy as np
 import torch
-from torch._C import ThroughputBenchmark
 import torchvision
 from torchvision import transforms
 from PIL import Image
@@ -46,6 +46,7 @@ def runtime(mod, params, target="llvm"):
     m.run()
     # Get outputs
     tvm_output = m.get_output(0)
+    return tvm_output
 
 
 def synset_lookup(tvm_output):
@@ -80,7 +81,8 @@ def synset_lookup(tvm_output):
     class_id_to_key = [x.strip() for x in class_id_to_key]
 
     # Get top-1 result for TVM
-    top1_tvm = np.argmax(tvm_output.numpy()[0])
+    # top1_tvm = np.argmax(tvm_output.numpy()[0])
+    top1_tvm = np.argmax(tvm_output)
     tvm_class_key = class_id_to_key[top1_tvm]
 
     # Convert input to PyTorch variable and get PyTorch result for comparison
@@ -117,8 +119,10 @@ def test_img():
 
 
 if __name__ == '__main__':
+    ssl._create_default_https_context = ssl._create_unverified_context
+
     model_name = "resnet18"
-    model = getattr(ThroughputBenchmark.models, model_name)(pretrained=True)
+    model = getattr(torchvision.models, model_name)(pretrained=True)
     model = model.eval()
 
     img = test_img()
