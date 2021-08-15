@@ -16,7 +16,7 @@ import cudaprofile as cp
 
 BUILD_PATH = "build/"
 INP_NUM = 1000
-DUP = 2
+DUP = 1
 
 
 def main(model_name, model, rt):
@@ -36,17 +36,25 @@ def main(model_name, model, rt):
     
 
     def e2e():
+        cp.start()
+
         start = time()
         for img in repo:
             predict_torch(model, img)
         end = time()
         tem_torch = end - start
 
+        cp.stop()
+
+        # cp.start()
+
         start = time()
         for img in repo:
             predict(rt, img)
         end = time()
         tem_tvm = end - start
+
+        # cp.stop()
 
         return tem_torch, tem_tvm
 
@@ -64,17 +72,17 @@ def main(model_name, model, rt):
         duration_torch += tem_torch
         duration_tvm += tem_tvm
 
-    print("\nConfig:\n  model = %s\n  INP_NUM = %d\n  DUP = %d" % (model_name, INP_NUM, DUP))
+    print("\nConfig:\n    model = %s\n    INP_NUM = %d\n    DUP = %d" % (model_name, INP_NUM, DUP))
     print("End2End Profiling Result")
     print("================================================")
-    print("PyTorch RunTime:  ", duration_torch, "s")
-    print("TVM Graph RunTime:", duration_tvm, "s")
+    print("    PyTorch RunTime:  ", duration_torch, "s")
+    print("    TVM Graph RunTime:", duration_tvm, "s")
     print("================================================\n")
 
     return
 
 
-def init():
+def init(cplFlag):
     img = sample_img()
     # mod, params = encapsulate(model, img)
     # tvm_output = runtime(mod, params, img, imgName="default" target="llvm")
@@ -85,7 +93,7 @@ def init():
     target = "cuda -libs=cublas,cudnn"
     
     # rt = runtime_v7(ctx=tvm.cpu(), target="llvm", compiled=False)
-    rt = runtime_v7(ctx=ctx, target=target, compiled=False)
+    rt = runtime_v7(ctx=ctx, target=target, compiled=cplFlag)
     # rt = runtime_v7(ctx=ctx, target=target, compiled=True)
     tvm_output = predict(rt, img, imgType="default", ctx=ctx)
 
@@ -300,11 +308,13 @@ if __name__ == '__main__':
 
     # model_name = "resnet18"
     # model_name = "resnet34"
-    # model_name = "resnet50"
+    model_name = "resnet50"
     # model_name = "resnet101"
-    model_name = "resnet152"
+    # model_name = "resnet152"
     model = getattr(torchvision.models, model_name)(pretrained=True)
     model = model.eval()
 
-    rt = init()
+    torch.device('cuda:0')
+
+    rt = init(True)
     main(model_name, model, rt)
