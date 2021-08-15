@@ -301,7 +301,8 @@ if __name__ == '__main__':
     # model_name = "resnet18"
     # model_name = "resnet34"
     # model_name = "resnet50"
-    model_name = "resnet101"
+    # model_name = "resnet101"
+    model_name = "resnet152"
     model = getattr(torchvision.models, model_name)(pretrained=True)
     model = model.eval()
 

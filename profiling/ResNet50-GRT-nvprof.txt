@@ -1,0 +1,62 @@
+==54175== Profiling application: python3 engine.py
+==54175== Profiling result:
+            Type  Time(%)      Time     Calls       Avg       Min       Max  Name
+ GPU activities:    9.60%  653.42ms      1000  653.42us  594.75us  699.03us  fused_nn_conv2d_multiply_add_nn_relu_6_kernel0
+                    8.70%  591.97ms      5000  118.39us  105.82us  127.36us  fused_nn_conv2d_multiply_add_nn_relu_5_kernel0
+                    8.52%  580.10ms      1000  580.10us  533.31us  617.50us  fused_nn_conv2d_multiply_add_nn_relu_2_kernel0
+                    7.23%  491.95ms      2000  245.98us  221.57us  265.09us  fused_nn_conv2d_multiply_add_nn_relu_1_kernel0
+                    6.06%  412.69ms      1000  412.69us  372.99us  444.22us  fused_nn_conv2d_3_kernel0
+                    5.24%  356.72ms      5000  71.344us  64.096us  78.271us  fused_nn_conv2d_multiply_add_nn_relu_4_kernel2
+                    4.89%  332.90ms      5000  66.580us  59.776us  72.416us  fused_nn_conv2d_multiply_add_add_nn_relu_1_kernel0
+                    3.99%  271.28ms      3000  90.426us  81.919us  97.215us  fused_nn_conv2d_multiply_add_nn_relu_9_kernel0
+                    3.75%  255.53ms      2000  127.76us  125.44us  130.34us  fused_nn_conv2d_multiply_add_nn_relu_kernel0
+                    3.16%  214.73ms      1000  214.73us  193.09us  231.33us  fused_nn_conv2d_1_kernel0
+                    2.82%  192.19ms      1000  192.19us  172.90us  206.82us  fused_nn_conv2d_2_kernel0
+                    2.75%  187.07ms      2000  93.534us  84.607us  101.66us  fused_nn_conv2d_multiply_add_add_nn_relu_kernel0
+                    2.62%  178.64ms      3000  59.545us  55.327us  63.743us  fused_nn_conv2d_multiply_add_add_nn_relu_2_kernel0
+                    2.42%  164.48ms      2000  82.240us  79.840us  85.183us  fused_nn_conv2d_multiply_add_nn_relu_kernel2
+                    2.31%  157.42ms      1000  157.42us  142.88us  170.72us  fused_nn_conv2d_multiply_add_nn_relu_10_kernel0
+                    2.31%  157.05ms      3000  52.350us  46.944us  56.928us  fused_nn_conv2d_multiply_add_nn_relu_8_kernel2
+                    2.29%  156.09ms      1000  156.09us  140.38us  168.03us  fused_nn_conv2d_multiply_add_nn_relu_3_kernel0
+                    2.24%  152.17ms      5000  30.434us  28.512us  33.632us  fused_nn_conv2d_multiply_add_nn_relu_4_kernel0
+                    1.86%  126.88ms      2000  63.440us  59.967us  66.783us  fused_nn_conv2d_multiply_add_add_nn_relu_3_kernel0
+                    1.70%  115.73ms      1000  115.73us  104.67us  124.61us  fused_nn_conv2d_multiply_add_nn_relu_7_kernel0
+                    1.68%  114.43ms      2000  57.213us  51.456us  65.887us  fused_nn_conv2d_multiply_add_nn_relu_13_kernel0
+                    1.46%  99.254ms      1000  99.254us  97.535us  109.57us  [CUDA memcpy HtoD]
+                    1.45%  98.446ms      1000  98.445us  88.224us  106.66us  fused_nn_conv2d_multiply_add_nn_relu_11_kernel0
+                    1.37%  93.455ms      1000  93.454us  84.799us  100.29us  fused_nn_conv2d_multiply_add_multiply_add_add_nn_relu_kernel0
+                    1.11%  75.593ms      1000  75.593us  67.904us  82.911us  fused_nn_conv2d_multiply_add_nn_relu_15_kernel0
+                    1.06%  72.290ms      3000  24.096us  21.728us  25.920us  fused_nn_conv2d_multiply_add_nn_relu_12_kernel2
+                    0.98%  66.683ms      1000  66.683us  60.224us  72.287us  fused_nn_conv2d_multiply_add_multiply_add_add_nn_relu_1_kernel0
+                    0.95%  64.797ms      1000  64.796us  62.047us  67.199us  fused_nn_conv2d_multiply_add_multiply_add_add_nn_relu_3_kernel0
+                    0.90%  61.035ms      1000  61.035us  59.263us  62.912us  volta_sgemm_64x32_sliced1x4_tn
+                    0.84%  56.905ms      1000  56.905us  51.520us  61.504us  fused_nn_conv2d_multiply_add_multiply_add_add_nn_relu_2_kernel0
+                    0.72%  48.750ms      1000  48.750us  44.735us  53.279us  fused_nn_conv2d_kernel0
+                    0.46%  31.128ms      3000  10.375us  9.4080us  11.552us  fused_nn_conv2d_multiply_add_nn_relu_12_kernel1
+                    0.43%  29.304ms      3000  9.7680us  8.1600us  19.200us  fused_nn_conv2d_multiply_add_nn_relu_12_kernel3
+                    0.42%  28.375ms      3000  9.4580us  8.5440us  10.208us  fused_nn_conv2d_multiply_add_nn_relu_8_kernel0
+                    0.33%  22.525ms      5000  4.5040us  3.9680us  5.6960us  fused_nn_conv2d_multiply_add_nn_relu_4_kernel1
+                    0.23%  15.729ms      3000  5.2430us  4.1280us  6.9440us  fused_nn_conv2d_multiply_add_nn_relu_8_kernel1
+                    0.22%  14.786ms      1000  14.785us  13.312us  15.936us  fused_nn_conv2d_multiply_add_nn_relu_14_kernel0
+                    0.19%  13.082ms      3000  4.3600us  3.5840us  15.455us  fused_nn_conv2d_multiply_add_nn_relu_12_kernel0
+                    0.17%  11.503ms      5000  2.3000us  1.9840us  2.7200us  fused_nn_conv2d_multiply_add_nn_relu_4_kernel3
+                    0.15%  10.173ms      1000  10.172us  9.0560us  17.088us  fused_nn_max_pool2d_kernel0
+                    0.13%  9.1501ms      3000  3.0500us  2.6560us  3.6160us  fused_nn_conv2d_multiply_add_nn_relu_8_kernel3
+                    0.09%  6.3173ms      2000  3.1580us  2.8160us  3.6480us  fused_nn_conv2d_multiply_add_nn_relu_kernel1
+                    0.06%  4.0548ms      2000  2.0270us  1.6960us  2.3360us  fused_nn_conv2d_multiply_add_nn_relu_kernel3
+                    0.06%  3.9812ms      1000  3.9810us  3.5840us  4.2880us  fused_nn_adaptive_avg_pool2d_kernel0
+                    0.03%  1.8288ms      1000  1.8280us  1.6960us  2.0160us  fused_nn_dense_add_kernel0
+                    0.02%  1.4203ms      1000  1.4200us  1.3120us  1.5360us  fused_reshape_squeeze_kernel0
+                    0.02%  1.1280ms      1000  1.1270us  1.0240us  1.4720us  [CUDA memcpy DtoH]
+                    0.01%  798.39us      1000     798ns     736ns  1.1200us  [CUDA memset]
+      API calls:   89.21%  6.26370s      2000  3.1318ms  130.62us  6.6070ms  cudaMemcpy
+                    9.71%  681.49ms     96000  7.0980us  4.3510us  164.73ms  cuLaunchKernel
+                    0.39%  27.159ms     96000     282ns     211ns  469.97us  cudaGetDevice
+                    0.38%  26.481ms     60000     441ns     270ns  528.85us  cudaSetDevice
+                    0.11%  7.9547ms      1000  7.9540us  6.5560us  462.15us  cudaLaunchKernel
+                    0.09%  6.6684ms      1000  6.6680us  5.5350us  25.848us  cudaMemsetAsync
+                    0.05%  3.5228ms      1000  3.5220us  3.0640us  21.080us  cudaEventQuery
+                    0.04%  2.5597ms      1000  2.5590us  2.1950us  18.540us  cudaStreamSynchronize
+                    0.02%  1.2843ms      1000  1.2840us  1.0830us  17.355us  cudaEventRecord
+                    0.00%  221.21us      1000     221ns     145ns  16.421us  cudaGetLastError
+========
