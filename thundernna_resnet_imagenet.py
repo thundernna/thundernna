@@ -64,7 +64,7 @@ def thundernna_attack(img, target, model, epsilon):
     model.zero_grad()
     loss.backward()
     data_grad = img.grad.data
-    tub = torch.clamp(img / data_grad, -epsilon, epsilon)
+    tub = torch.clamp(torch.ones_like(img).to(device) / data_grad, -epsilon, epsilon)
     tub = torch.nan_to_num(tub)
     return img + tub
 
