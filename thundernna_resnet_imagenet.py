@@ -10,6 +10,7 @@ from tqdm import tqdm
 from torch.utils.data import Dataset, TensorDataset
 BatchSize = 1
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+import time
 def recreate_image(im_as_var):
     """
         Recreates images from a torch variable, sort of reverse preprocessing
@@ -50,12 +51,8 @@ def load_imagenet(PATH = "./data/"):
     return dataset
 
 def predict_torch(model, img):
-    """
     with torch.no_grad():
-        torch_img = torch.from_numpy(img)
-        torch_output = model(torch_img)
-    """
-    torch_output = model(img)
+        torch_output = model(img)
     return torch_output
 
 
@@ -79,11 +76,14 @@ dataset = load_imagenet()
 test_loader = torch.utils.data.DataLoader(dataset, batch_size=BatchSize, shuffle=False)
 epsilon = 0.3
 correct = 0
+start = time.time()
 for idx, (img, target) in tqdm(enumerate(test_loader)):
     perturbed_img =thundernna_attack(img, target, pretrained_model, epsilon)
     out = predict_torch(pretrained_model, perturbed_img)
     final_pred = out.data.max(1, keepdim=True)[1]
     correct += final_pred.eq(target.data.view_as(final_pred)).sum()
+end = time.time()
+print("using",end-start ,"s")
 final_acc = correct/float(len(test_loader.dataset))
 print("Epsilon: {}\tTest Accuracy = {} / {} = {}".format(epsilon, correct, len(test_loader.dataset), final_acc))
 
