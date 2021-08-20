@@ -72,10 +72,19 @@ def entrance():
         result = "True" if consistFlag else "False"
         print("Consistency of disturbed images:", result, "\n")
 
-        im1 = Image.fromarray(img1 + turb1)
-        im2 = Image.fromarray(img2 + turb2)
-        im1.save(os.path.join(OUT_PATH, "ori_disturbed.jpeg"))
-        im2.save(os.path.join(OUT_PATH, "engine_disturbed.jpeg"))
+        im_sv = Image.fromarray(img1)
+        im_sv.save(os.path.join(OUT_PATH, "original.jpeg"))
+
+        im_sv = Image.fromarray(img1 + turb1)
+        im_sv.save(os.path.join(OUT_PATH, "ori_disturbed.jpeg"))
+        im_sv = Image.fromarray(turb1)
+        im_sv.save(os.path.join(OUT_PATH, "ori_noise.jpeg"))
+
+        im_sv = Image.fromarray(img2 + turb2)
+        im_sv.save(os.path.join(OUT_PATH, "engine_disturbed.jpeg"))
+        im_sv = Image.fromarray(turb2)
+        im_sv.save(os.path.join(OUT_PATH, "engine_noise.jpeg"))
+        
         print("Disturbed images saved.")
     
     if args.cmp:
@@ -97,29 +106,14 @@ def entrance():
         print("    With Inference Engine:", duration_engine, "s")
         print("================================================\n")
 
-
-
     return 
 
 
-def dumb():
-    repo = image_repo(INP_NUM)
-    print("%d input pictures prepared" % len(repo))
-
-    print("End to End profiling...")
-    duration_torch, duration_tvm = 0, 0
-    for i in range(DUP):
-        print("Dup #%4d times..." % (i + 1))
-        tem_torch, tem_tvm = e2e()
-        duration_torch += tem_torch
-        duration_tvm += tem_tvm
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    # parser.add_argument("--build_dir", type=str, default='.')
     # parser.add_argument("--consistency_check", type=int, default=0)
-    # parser.add_argument("--benchmark", type=int, default=1)
 
     parser.add_argument("--device", type=str, default="gpu")
     parser.add_argument("--model", type=str, default="resnet18")
