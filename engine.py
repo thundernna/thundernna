@@ -21,8 +21,10 @@ BUILD_PATH = "build/"
 INP_NUM = 1000
 DUP = 1
 
+BUILD_PATH = os.path.join(os.getcwd(), BUILD_PATH)
 if not os.path.exists(BUILD_PATH):
     os.makedirs(BUILD_PATH)
+print("BUILD_PATH SET:", BUILD_PATH, "\n")
 
 
 def main(model_name, model, rt):
@@ -88,17 +90,27 @@ def main(model_name, model, rt):
     return
 
 
-def init(cplFlag=False):
+def init(cplFlag=False, device="cpu"):
+    print("Eninge initializing...")
+
     img = sample_img()
-    ctx = tvm.gpu()
-    target = "cuda -libs=cublas,cudnn"
+    if device == "cpu":
+        target = "cpu"
+        ctx = tvm.cpu()
+    else:
+        ctx = tvm.gpu()
+        target = "cuda -libs=cublas,cudnn"
     
     rt = runtime_v7(ctx=ctx, target=target, compiled=cplFlag)
     tvm_output = predict(rt, img, imgType="default", ctx=ctx)
 
     torch_output = predict_torch(model, img)
-    synset_lookup([tvm_output], [torch_output])
+    consistFlag = synset_lookup([tvm_output], [torch_output])
 
+
+    print("Init Done.")
+    result = "True" if consistFlag else "False"
+    print("Result of consistency check:", result, "\n")
     return rt
 
 
