@@ -36,17 +36,17 @@ def main(model_name, model, rt):
     
 
     def e2e():
-        cp.start()
+        # cp.start()
 
         start = time()
-        for img in repo:
-            predict_torch(model, img)
+        # for img in repo:
+        #     predict_torch(model, img)
         end = time()
         tem_torch = end - start
 
-        cp.stop()
+        # cp.stop()
 
-        # cp.start()
+        cp.start()
 
         start = time()
         for img in repo:
@@ -54,7 +54,7 @@ def main(model_name, model, rt):
         end = time()
         tem_tvm = end - start
 
-        # cp.stop()
+        cp.stop()
 
         return tem_torch, tem_tvm
 
