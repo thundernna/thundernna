@@ -23,7 +23,7 @@ DUP = 1
 
 BUILD_PATH = os.path.join(os.getcwd(), BUILD_PATH)
 if not os.path.exists(BUILD_PATH):
-    os.makedirs(BUILD_PATH)
+    os.system("mkdir -p %s" % BUILD_PATH)
 print("BUILD_PATH SET:", BUILD_PATH, "\n")
 
 
@@ -90,7 +90,7 @@ def main(model_name, model, rt):
     return
 
 
-def init(cplFlag=False, device="cpu"):
+def init(model_name, model, cplFlag=False, device="cpu"):
     print("Eninge initializing...")
 
     img = sample_img()
@@ -101,7 +101,7 @@ def init(cplFlag=False, device="cpu"):
         ctx = tvm.gpu()
         target = "cuda -libs=cublas,cudnn"
     
-    rt = runtime_v7(ctx=ctx, target=target, compiled=cplFlag)
+    rt = runtime_v7(model_name, model, ctx=ctx, target=target, compiled=cplFlag)
     tvm_output = predict(rt, img, imgType="default", ctx=ctx)
 
     torch_output = predict_torch(model, img)

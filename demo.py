@@ -14,7 +14,7 @@ from engine import *
 OUT_PATH = "/output"
 OUT_PATH = os.path.join(os.getcwd(), OUT_PATH)
 if not os.path.exists(OUT_PATH):
-    os.makedirs(OUT_PATH)
+    os.system("mkdir -p %s" % OUT_PATH)
 print("OUT_PATH SET:", OUT_PATH, "\n")
 
 
@@ -54,7 +54,7 @@ def entrance():
     torch.device(device)
 
     cplFlag = True if args.compiled else False
-    rt = init(cplFlag, device)
+    rt = init(model_name, model, cplFlag, device)
 
     ### main(model_name, model, rt)
 
@@ -121,12 +121,12 @@ if __name__ == '__main__':
     # parser.add_argument("--consistency_check", type=int, default=0)
     # parser.add_argument("--benchmark", type=int, default=1)
 
-    parser.add_argument("--device", type=str, default="cpu")
+    parser.add_argument("--device", type=str, default="gpu")
     parser.add_argument("--model", type=str, default="resnet18")
     parser.add_argument("--attacker", type=str, default="thunder")
     parser.add_argument("--compiled", type=int, default=0)
     parser.add_argument("--cc", type=int, default=1)
-    parser.add_argument("--cmp", type=int, default=1)
+    parser.add_argument("--cmp", type=int, default=0)
     parser.add_argument("--prof_cuda", type=int, default=0)
     parser.add_argument("--epsilon", type=float, default=0.2)
 
