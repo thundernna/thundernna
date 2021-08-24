@@ -34,7 +34,7 @@ def main(model_name, model, rt):
         print("Warming up...")
         for i, img in enumerate(repo):
             print("Warming up... %4d / %4d" % ((i + 1), lth))
-            tvm_output_list.append(predict_torch(model, img))
+            tvm_output_list.append(predict_torch(model, torch.from_numpy(img)))
             torch_output_list.append(predict(rt, img))
         
         consistFlag = synset_lookup(tvm_output_list, torch_output_list)
@@ -104,7 +104,7 @@ def init(model_name, model, cplFlag=False, device="cpu"):
     rt = runtime_v7(model_name, model, ctx=ctx, target=target, compiled=cplFlag)
     tvm_output = predict(rt, img, imgType="default", ctx=ctx)
 
-    torch_output = predict_torch(model, img)
+    torch_output = predict_torch_ng(model, torch.from_numpy(img)).numpy()
     consistFlag = synset_lookup([tvm_output], [torch_output])
 
 

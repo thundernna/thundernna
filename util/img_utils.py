@@ -1,6 +1,7 @@
 import os
 import ssl
 import numpy as np
+import torch
 from torchvision import transforms
 from PIL import Image
 from tvm.contrib.download import download_testdata
@@ -87,7 +88,7 @@ def image_repo(num):
     for i, imgName in enumerate(files[:max(num, 0)], 1):
         print("Preparing #%4d input picture..." % i)
         img = Image.open(os.path.join(imagePath, imgName)).resize((224, 224))
-        repo.append(preprocess(img))
+        repo.append(torch.from_numpy(preprocess(img)))
     
     print("Input images ready. ")
     return repo

@@ -30,9 +30,22 @@ def recreate_image(im_as_var):
 
 
 def predict_torch(model, img):
-    with torch.no_grad():
-        torch_img = torch.from_numpy(img)
-        torch_output = model(torch_img)
+    # with torch.no_grad():
+    torch_output = model(img)
     
-    return torch_output.numpy()
+    return torch_output
 
+
+def predict_torch_ng(model, img):
+    with torch.no_grad():
+        torch_output = model(img)
+    
+    return torch_output
+
+
+# def predict_torch(model, img):
+#     with torch.no_grad():
+#         torch_img = torch.from_numpy(img)
+#         torch_output = model(torch_img)
+    
+#     return torch_output.numpy()

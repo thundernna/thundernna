@@ -22,21 +22,21 @@ def entrance():
     def compare():
         start = time()
         for img in repo:
-            img, turb = thundernna_attack(img, target, model, args.epsilon)
+            img, turb = thundernna_attack(img, model, args.epsilon)
         end = time()
         tem_torch = end - start
 
-        if args.prof_cuda:
-            cp.start()
+        # if args.prof_cuda:
+        #     cp.start()
 
-        start = time()
-        for img in repo:
-            img, turb = thundernna_with_engine(rt, "default", ctx, img, target, model, args.epsilon)
-        end = time()
+        # start = time()
+        # for img in repo:
+        #     img, turb = thundernna_with_engine(rt, "default", ctx, img, model, args.epsilon)
+        # end = time()
         tem_tvm = end - start
 
-        if args.prof_cuda:
-            cp.stop()
+        # if args.prof_cuda:
+        #     cp.stop()
 
         return tem_torch, tem_tvm
 
@@ -58,15 +58,17 @@ def entrance():
 
     ### main(model_name, model, rt)
 
+    print("here")
+
 
     if args.cc:
-        img = sample_img()
+        img = torch.from_numpy(sample_img())
 
-        img1, turb1 = thundernna_attack(img, target, model, args.epsilon)
-        img2, turb2 = thundernna_with_engine(rt, "default", ctx, img, target, model, args.epsilon)
+        img1, turb1 = thundernna_attack(img, model, args.epsilon)
+        img2, turb2 = thundernna_with_engine(rt, "default", ctx, img, model, args.epsilon)
 
-        mob1 = predict_torch(model, img1 + turb1)
-        mob2 = predict_torch(model, img2 + turb2)
+        mob1 = predict_torch(model, torch.from_numpy(img1 + turb1)).numpy()
+        mob2 = predict_torch(model, torch.from_numpy(img2 + turb2)).numpy()
         consistFlag = np.argmax(mob1) == np.argmax(mob2)
 
         result = "True" if consistFlag else "False"
@@ -125,5 +127,9 @@ if __name__ == '__main__':
     parser.add_argument("--epsilon", type=float, default=0.2)
 
     args = parser.parse_args()
+
+    if args.attacker != "thunder":
+        print("Not supported yet.")
+        exit()
 
     entrance()
